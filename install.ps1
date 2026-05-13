@@ -19,7 +19,8 @@
     SQL Server port. Default: 1433.
 
 .PARAMETER MssqlDatabase
-    Database name. Default: arcerp_qa.
+    Database name. Default offered: arcerp_qa. Prompts to override unless
+    passed explicitly.
 
 .PARAMETER MssqlUser
     SQL login. Prompts if not provided.
@@ -45,12 +46,16 @@
 param(
     [string]$MssqlServer,
     [string]$MssqlPort = "1433",
-    [string]$MssqlDatabase = "arcerp_qa",
+    [string]$MssqlDatabase,
     [string]$MssqlUser,
     [SecureString]$MssqlPassword,
     [string]$ConfigPath = (Join-Path $env:APPDATA "Claude\claude_desktop_config.json"),
     [string]$DdlPackageVersion = "0.1.1"
 )
+
+# Use this as the default offered at the prompt. Defined here (not in param()
+# block) so we can detect explicit override via $PSBoundParameters.
+if (-not $MssqlDatabase) { $MssqlDatabase = "arcerp_qa" }
 
 $ErrorActionPreference = "Stop"
 
@@ -89,6 +94,13 @@ if (-not $MssqlServer) {
 }
 if (-not $MssqlUser) {
     $MssqlUser = Read-Host "    User"
+}
+# Database: prompt with default offered, unless explicitly passed via -MssqlDatabase.
+if (-not $PSBoundParameters.ContainsKey('MssqlDatabase')) {
+    $dbInput = Read-Host "    Database (Enter for default: $MssqlDatabase)"
+    if ($dbInput) {
+        $MssqlDatabase = $dbInput
+    }
 }
 Write-Host "    Server:   $MssqlServer`:$MssqlPort"
 Write-Host "    Database: $MssqlDatabase"
