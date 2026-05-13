@@ -1,0 +1,43 @@
+{
+  "name": "@peterpan163/mssql-ddl-mcp",
+  "version": "0.1.1",
+  "description": "Sidecar MCP server exposing a whitelisted ddl_query tool for Microsoft SQL Server (CREATE/DROP INDEX, CREATE/ALTER/DROP VIEW).",
+  "type": "module",
+  "main": "dist/ddl-mcp-server.js",
+  "bin": {
+    "mssql-ddl-mcp": "dist/ddl-mcp-server.js"
+  },
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/ddl-mcp-server.js",
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "mssql",
+    "sql-server",
+    "ddl"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PeterPan-163/mssql-ddl-mcp.git"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "mssql": "^11.0.0"
+  },
+  "devDependencies": {
+    "@types/mssql": "^9.1.11",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
