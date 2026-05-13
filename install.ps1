@@ -13,7 +13,7 @@
     the existing config before modifying it. Verifies Node.js is installed.
 
 .PARAMETER MssqlServer
-    SQL Server host. Default: 40.90.226.68.
+    SQL Server host (IP or DNS name). Prompts if not provided.
 
 .PARAMETER MssqlPort
     SQL Server port. Default: 1433.
@@ -22,7 +22,7 @@
     Database name. Default: arcerp_qa.
 
 .PARAMETER MssqlUser
-    SQL login. Default: dev.
+    SQL login. Prompts if not provided.
 
 .PARAMETER MssqlPassword
     SQL password as a SecureString. If omitted, prompts securely.
@@ -43,10 +43,10 @@
 
 [CmdletBinding()]
 param(
-    [string]$MssqlServer = "40.90.226.68",
+    [string]$MssqlServer,
     [string]$MssqlPort = "1433",
     [string]$MssqlDatabase = "arcerp_qa",
-    [string]$MssqlUser = "dev",
+    [string]$MssqlUser,
     [SecureString]$MssqlPassword,
     [string]$ConfigPath = (Join-Path $env:APPDATA "Claude\claude_desktop_config.json"),
     [string]$DdlPackageVersion = "0.1.1"
@@ -82,8 +82,14 @@ if (-not $nodeVersion) {
 }
 Write-Ok "Node.js $nodeVersion"
 
-# --- 2. Get password ---
+# --- 2. Get credentials ---
 Write-Step "SQL Server credentials"
+if (-not $MssqlServer) {
+    $MssqlServer = Read-Host "    Host (IP or DNS name)"
+}
+if (-not $MssqlUser) {
+    $MssqlUser = Read-Host "    User"
+}
 Write-Host "    Server:   $MssqlServer`:$MssqlPort"
 Write-Host "    Database: $MssqlDatabase"
 Write-Host "    User:     $MssqlUser"
