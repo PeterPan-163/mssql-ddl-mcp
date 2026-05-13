@@ -22,20 +22,46 @@ Everything else is rejected with a clear error. Patterns like `DROP TABLE`,
 
 ## Quick install (recommended for new machines)
 
-On any new machine, run this one PowerShell command:
+Two equivalent paths — pick whichever fits the user.
+
+### Option A — Double-click installer (easiest, no PowerShell knowledge needed)
+
+1. Download [`install.bat`](install.bat) from this repo (right-click the
+   raw view → Save link as).
+2. Double-click `install.bat`.
+3. Enter the SQL host, user, and password when prompted.
+4. Quit and reopen Cowork / Claude Desktop.
+
+The `.bat` is a thin wrapper that calls PowerShell with
+`-ExecutionPolicy Bypass` and pipes `install.ps1` through `iwr | iex`.
+No execution-policy adjustment is needed system-wide.
+
+### Option B — PowerShell one-liner (for command-line users)
 
 ```powershell
 iwr -useb https://raw.githubusercontent.com/PeterPan-163/mssql-ddl-mcp/main/install.ps1 | iex
 ```
 
-It checks Node.js is installed, prompts securely for the SQL password,
-backs up the existing Cowork / Claude Desktop config, and adds both MCP
-entries (`arcerp` for read/write and `arcerp_ddl` for whitelisted DDL).
-Quit and reopen Cowork after it finishes.
+If PowerShell's execution policy blocks the script, run this once first
+in the same window:
 
-Defaults (server, port, database, user) are baked into the script — edit
-the `param()` block at the top before sharing if your team uses different
-values.
+```powershell
+Set-ExecutionPolicy -Scope Process Bypass
+```
+
+---
+
+Both paths do the same thing: check Node.js is installed, prompt
+securely for the SQL host/user/password, back up the existing Cowork /
+Claude Desktop config, and add both MCP entries (`arcerp` for
+read/write and `arcerp_ddl` for whitelisted DDL).
+
+Database (`arcerp_qa`) and port (`1433`) are defaults. To override at
+install time, use the parameterized form:
+
+```powershell
+& ([scriptblock]::Create((iwr -useb https://raw.githubusercontent.com/PeterPan-163/mssql-ddl-mcp/main/install.ps1).Content)) -MssqlDatabase arcerp_prod
+```
 
 ---
 
