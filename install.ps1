@@ -72,7 +72,7 @@ function Write-Warn($msg) {
     Write-Host "    $msg" -ForegroundColor Yellow
 }
 
-# --- 1. Verify Node.js ---
+# --- 1a. Verify Node.js ---
 Write-Step "Checking for Node.js"
 $nodeVersion = $null
 try {
@@ -86,6 +86,38 @@ if (-not $nodeVersion) {
     exit 1
 }
 Write-Ok "Node.js $nodeVersion"
+
+# --- 1b. Verify uv (Python package runner) — required for Windows-MCP and
+# any other Python-based MCP servers added later. Auto-install if missing.
+Write-Step "Checking for uv (Python MCP runner)"
+$uvVersion = $null
+try {
+    $uvVersion = (uv --version) 2>$null
+} catch {}
+if (-not $uvVersion) {
+    Write-Warn "uv not found. Installing from astral.sh..."
+    try {
+        # Official installer; pins itself, no admin required, installs to %USERPROFILE%\.local\bin
+        Invoke-RestMethod -Uri "https://astral.sh/uv/install.ps1" | Invoke-Expression
+    } catch {
+        Write-Host "    uv install failed: $_" -ForegroundColor Red
+        Write-Host "    Continuing without uv. Windows-MCP and other Python MCPs will not work" -ForegroundColor Yellow
+        Write-Host "    until you install uv manually: irm https://astral.sh/uv/install.ps1 | iex" -ForegroundColor Yellow
+    }
+    # Refresh PATH for the current session so we can verify the install
+    $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" +
+                [System.Environment]::GetEnvironmentVariable("Path", "User")
+    try {
+        $uvVersion = (uv --version) 2>$null
+    } catch {}
+    if ($uvVersion) {
+        Write-Ok "uv $uvVersion (just installed)"
+    } else {
+        Write-Warn "uv installer ran but `uv` is still not on PATH — restart your terminal after this script."
+    }
+} else {
+    Write-Ok "uv $uvVersion"
+}
 
 # --- 2. Get credentials ---
 Write-Step "SQL Server credentials"
